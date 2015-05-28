@@ -30,11 +30,15 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import spark.webserver.websocket.EventServlet;
 
 /**
  * Spark server implementation
@@ -117,7 +121,22 @@ public class SparkServer {
 
         // Handle static file routes
         if (staticFilesFolder == null && externalFilesFolder == null) {
-            server.setHandler(handler);
+
+            HandlerList handlers = new HandlerList();
+
+            // Setup the basic application "context" for this application at "/"
+            // This is also known as the handler tree (in jetty speak)
+            ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+            context.setContextPath("/ws");
+
+            handlers.addHandler(context);
+            handlers.addHandler(handler);
+
+            // Add a websocket to a specific path spec
+            ServletHolder holderEvents = new ServletHolder("ws-events", EventServlet.class);
+            context.addServlet(holderEvents, "/events/*");
+
+            server.setHandler(handlers);
         } else {
             List<Handler> handlersInList = new ArrayList<Handler>();
             handlersInList.add(handler);

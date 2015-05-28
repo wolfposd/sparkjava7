@@ -2,6 +2,7 @@ package spark;
 
 import java.util.concurrent.CountDownLatch;
 
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +11,8 @@ import spark.route.SimpleRouteMatcher;
 import spark.servlet.SparkFilter;
 import spark.webserver.SparkServer;
 import spark.webserver.SparkServerFactory;
+import spark.webserver.websocket.EventServlet;
+import spark.webserver.websocket.EventSocket;
 
 /**
  * Spark base class
@@ -238,6 +241,24 @@ public abstract class SparkBase {
         } else {
             LOG.warn("External static file location has already been set");
         }
+    }
+
+    /**
+     * Adds a web socket connection (TO VERIFY: Can a websocket be added in Jetty runtime or must this be done before settings routes/filters ie. initialized. Otherwise
+     * I might have to add an extra method like start() which can be run if application only consists of web sockets (is this possible?)
+     * @param socket the web socket.
+     * @param name the name // TODO: Is this needed
+     * @param path the path (might be that they default lands under /ws/ due to not being able to addServlet for path '/' twice in SparkServer).
+     *
+     *             // TODO: this is to be protected and just the "access" api available in other spark pom e.g. spark-embedded-jetty-web-sockets
+     *             // TODO: because I don't want to pollute the API with jetty specific classes.
+     *
+     *             // TODO: Should there be a removeSocket? (should there be removeRoute()? (there is in SimpleRouteFactory, enough?)
+     *             // TODO: LifeCycleListener (LifeCycleEventListener?)
+     *
+     */
+    public void webSocket(EventSocket socket, String name /*needed*/, String path) {
+
     }
 
     /**
