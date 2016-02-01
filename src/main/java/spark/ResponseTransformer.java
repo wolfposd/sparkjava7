@@ -21,7 +21,6 @@ package spark;
  *
  * @author alex
  */
-@FunctionalInterface
 public interface ResponseTransformer {
 
     /**
