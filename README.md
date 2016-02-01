@@ -1,6 +1,4 @@
-![](https://img.shields.io/travis/perwendel/spark.svg) 
-![](https://img.shields.io/github/license/perwendel/spark.svg)
-![](https://img.shields.io/maven-central/v/com.sparkjava/spark-core.svg)
+![](https://img.shields.io/travis/wolfposd/sparkjava7.svg) 
 
 Spark - a Sinatra inspired web framework
 ==============================================
