@@ -3,7 +3,6 @@ package spark;
 /**
  * Created by Per Wendel on 2014-05-10.
  */
-@FunctionalInterface
 public interface Route {
 
     /**
