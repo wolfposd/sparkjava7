@@ -7,11 +7,13 @@
         <version>7</version>
     </parent>
     <groupId>com.sparkjava</groupId>
-    <artifactId>spark-core</artifactId>
+    <artifactId>spark-core7</artifactId>
     <packaging>bundle</packaging>
     <version>2.4-SNAPSHOT</version>
-    <name>Spark</name>
-    <description>A Sinatra inspired java web framework</description>
+    <name>Spark Java 1.7</name>
+    <description>A Sinatra inspired java web framework
+
+Java 1.7 Branch</description>
     <url>http://www.sparkjava.com</url>
     <licenses>
         <license>
@@ -21,9 +23,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:git:git@github.com:perwendel/spark.git</connection>
-        <developerConnection>scm:git:git@github.com:perwendel/spark.git</developerConnection>
-        <url>scm:git:git@github.com:perwendel/spark.git</url>
+        <connection>scm:git:git@github.com:wolfposd/sparkjava7.git</connection>
+        <developerConnection>scm:git:git@github.com:wolfposd/sparkjava7.git</developerConnection>
+        <url>scm:git:git@github.com:wolfposd/sparkjava7.git</url>
     </scm>
     <developers>
     </developers>
