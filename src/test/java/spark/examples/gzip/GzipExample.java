@@ -19,6 +19,9 @@ package spark.examples.gzip;
 import static spark.Spark.awaitInitialization;
 import static spark.Spark.get;
 import static spark.Spark.staticFileLocation;
+import spark.Request;
+import spark.Response;
+import spark.Route;
 
 /**
  * Example showing off the different GZIP features in Spark.
@@ -41,10 +44,22 @@ public class GzipExample {
     }
 
     public static void addRoutes() {
-        get("/hello", (q, a) -> FO_SHIZZY);
-        get(PATH, (req, resp) -> {
-            resp.header("Content-Encoding", "gzip");
-            return CONTENT;
+        get("/hello", new Route()
+        {
+            @Override
+            public Object handle(Request q, Response a) throws Exception
+            {
+                return FO_SHIZZY;
+            }
+        });
+        get(PATH, new Route()
+        {
+            @Override
+            public Object handle(Request req, Response resp) throws Exception
+            {
+                resp.header("Content-Encoding", "gzip");
+                return CONTENT;
+            }
         });
     }
 

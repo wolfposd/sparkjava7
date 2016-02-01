@@ -22,7 +22,7 @@ import java.util.Map;
 import spark.Filter;
 import spark.Request;
 import spark.Response;
-
+import spark.Route;
 import static spark.Spark.after;
 import static spark.Spark.before;
 import static spark.Spark.get;
@@ -64,16 +64,31 @@ public class FilterExample {
             }
         });
 
-        before("/hello", (request, response) -> {
-            response.header("Foo", "Set by second before filter");
+        before("/hello", new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                response.header("Foo", "Set by second before filter");
+            }
         });
 
-        get("/hello", (request, response) -> {
-            return "Hello World!";
+        get("/hello", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "Hello World!";
+            }
         });
 
-        after("/hello", (request, response) -> {
-            response.header("spark", "added by after-filter");
+        after("/hello", new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                response.header("spark", "added by after-filter");
+            }
         });
 
     }

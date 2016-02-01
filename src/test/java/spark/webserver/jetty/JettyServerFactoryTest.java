@@ -2,7 +2,6 @@ package spark.webserver.jetty;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.eclipse.jetty.util.thread.ThreadPool;
 import org.junit.Test;
 import org.mockito.internal.util.reflection.Whitebox;
 

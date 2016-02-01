@@ -21,7 +21,6 @@ import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.jetty.server.Connector;
@@ -34,9 +33,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import spark.SparkServer;
+import spark.ssl.SslStores;
 import spark.webserver.jetty.JettyServerFactory;
 import spark.webserver.jetty.SocketConnectorFactory;
-import spark.ssl.SslStores;
 import spark.webserver.websocket.WebSocketServletContextHandlerFactory;
 
 /**
@@ -71,7 +70,7 @@ public class JettySparkServer implements SparkServer {
                        int minThreads,
                        int threadIdleTimeoutMillis,
                        Map<String, Class<?>> webSocketHandlers,
-                       Optional<Integer> webSocketIdleTimeoutMillis) {
+                       long webSocketIdleTimeoutMillis) {
 
         if (port == 0) {
             try (ServerSocket s = new ServerSocket(0)) {

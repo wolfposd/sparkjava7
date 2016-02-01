@@ -16,9 +16,10 @@
  */
 package spark;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
@@ -30,8 +31,6 @@ import spark.route.SimpleRouteMatcher;
 import spark.ssl.SslStores;
 import spark.staticfiles.StaticFiles;
 import spark.webserver.SparkServerFactory;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Holds the implementation of the Spark API. (previously in Spark and SparkBase).
@@ -57,7 +56,7 @@ final class SparkInstance extends Routable {
     protected int maxThreads = -1;
     protected int minThreads = -1;
     protected int threadIdleTimeoutMillis = -1;
-    protected Optional<Integer> webSocketIdleTimeoutMillis = Optional.empty();
+    protected long webSocketIdleTimeoutMillis = -1;
 
     protected SparkServer server;
     protected SimpleRouteMatcher routeMatcher;
@@ -75,6 +74,7 @@ final class SparkInstance extends Routable {
      * @param ipAddress The ipAddress
      * @deprecated replaced by {@link #ipAddress(String)}
      */
+    @Deprecated
     public synchronized void setIpAddress(String ipAddress) {
         if (initialized) {
             throwBeforeRouteMappingException();
@@ -104,6 +104,7 @@ final class SparkInstance extends Routable {
      * @param port The port number
      * @deprecated replaced by {@link #port(int)}
      */
+    @Deprecated
     public synchronized void setPort(int port) {
         if (initialized) {
             throwBeforeRouteMappingException();
@@ -141,6 +142,7 @@ final class SparkInstance extends Routable {
      * @param truststorePassword the trust store password
      * @deprecated replaced by {@link #secure(String, String, String, String)}
      */
+    @Deprecated
     public synchronized void setSecure(String keystoreFile,
                                        String keystorePassword,
                                        String truststoreFile,
@@ -279,7 +281,7 @@ final class SparkInstance extends Routable {
         if (ServletFlag.isRunningFromServlet()) {
             throw new IllegalStateException("WebSockets are only supported in the embedded server");
         }
-        webSocketIdleTimeoutMillis = Optional.of(timeoutMillis);
+        webSocketIdleTimeoutMillis = timeoutMillis;
     }
 
     /**
@@ -333,18 +335,23 @@ final class SparkInstance extends Routable {
         if (!initialized) {
             routeMatcher = RouteMatcherFactory.get();
             if (!ServletFlag.isRunningFromServlet()) {
-                new Thread(() -> {
-                    server = SparkServerFactory.create(hasMultipleHandlers());
-                    server.ignite(
-                            ipAddress,
-                            port,
-                            sslStores,
-                            latch,
-                            maxThreads,
-                            minThreads,
-                            threadIdleTimeoutMillis,
-                            webSocketHandlers,
-                            webSocketIdleTimeoutMillis);
+                new Thread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        server = SparkServerFactory.create(hasMultipleHandlers());
+                        server.ignite(
+                                ipAddress,
+                                port,
+                                sslStores,
+                                latch,
+                                maxThreads,
+                                minThreads,
+                                threadIdleTimeoutMillis,
+                                webSocketHandlers,
+                                webSocketIdleTimeoutMillis);
+                    }
                 }).start();
             }
             initialized = true;
@@ -361,7 +368,7 @@ final class SparkInstance extends Routable {
      * @param exceptionClass the exception class
      * @param handler        The handler
      */
-    public synchronized void exception(Class<? extends Exception> exceptionClass, ExceptionHandler handler) {
+    public synchronized void exception(Class<? extends Exception> exceptionClass, final ExceptionHandler handler) {
         // wrap
         ExceptionHandlerImpl wrapper = new ExceptionHandlerImpl(exceptionClass) {
             @Override

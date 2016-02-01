@@ -4,12 +4,11 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import spark.util.SparkTestUtil;
 import spark.util.SparkTestUtil.UrlResponse;
-
 import static spark.Spark.after;
 import static spark.Spark.before;
 import static spark.Spark.get;
@@ -38,40 +37,80 @@ public class GenericSecureIntegrationTest {
         Spark.secure(SparkTestUtil.getKeyStoreLocation(),
                      SparkTestUtil.getKeystorePassword(), null, null);
 
-        before("/protected/*", (request, response) -> {
-            halt(401, "Go Away!");
+        before("/protected/*", new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                halt(401, "Go Away!");
+            }
         });
 
-        get("/hi", (request, response) -> {
-            return "Hello World!";
+        get("/hi", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "Hello World!";
+            }
         });
 
-        get("/:param", (request, response) -> {
-            return "echo: " + request.params(":param");
+        get("/:param", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "echo: " + request.params(":param");
+            }
         });
 
-        get("/paramwithmaj/:paramWithMaj", (request, response) -> {
-            return "echo: " + request.params(":paramWithMaj");
+        get("/paramwithmaj/:paramWithMaj", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "echo: " + request.params(":paramWithMaj");
+            }
         });
 
-        get("/", (request, response) -> {
-            return "Hello Root!";
+        get("/", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "Hello Root!";
+            }
         });
 
-        post("/poster", (request, response) -> {
-            String body = request.body();
-            response.status(201); // created
-            return "Body was: " + body;
+        post("/poster", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                String body = request.body();
+                response.status(201); // created
+                return "Body was: " + body;
+            }
         });
 
-        patch("/patcher", (request, response) -> {
-            String body = request.body();
-            response.status(200);
-            return "Body was: " + body;
+        patch("/patcher", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                String body = request.body();
+                response.status(200);
+                return "Body was: " + body;
+            }
         });
 
-        after("/hi", (request, response) -> {
-            response.header("after", "foobar");
+        after("/hi", new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                response.header("after", "foobar");
+            }
         });
 
         Spark.awaitInitialization();

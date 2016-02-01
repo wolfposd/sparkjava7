@@ -31,5 +31,5 @@ public interface SparkApplication {
     /**
      * Invoked from the SparkFilter.
      */
-    default void destroy() {}
+    void destroy();
 }

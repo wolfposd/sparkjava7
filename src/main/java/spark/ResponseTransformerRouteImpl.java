@@ -34,8 +34,8 @@ public abstract class ResponseTransformerRouteImpl extends RouteImpl {
 
     public static ResponseTransformerRouteImpl create(String path,
                                                       String acceptType,
-                                                      Route route,
-                                                      ResponseTransformer transformer) {
+                                                      final Route route,
+                                                      final ResponseTransformer transformer) {
         return new ResponseTransformerRouteImpl(path, acceptType) {
             @Override
             public Object render(Object model) throws Exception {
@@ -59,6 +59,7 @@ public abstract class ResponseTransformerRouteImpl extends RouteImpl {
      * @param model object used to render output.
      * @return message that it is sent to client.
      */
+    @Override
     public abstract Object render(Object model) throws Exception;
 
 }

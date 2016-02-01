@@ -53,7 +53,7 @@ public class ServletTest {
         bb.setWar("src/test/webapp");
 
         server.setHandler(bb);
-        CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(1);
 
         new Thread(new Runnable() {
             @Override

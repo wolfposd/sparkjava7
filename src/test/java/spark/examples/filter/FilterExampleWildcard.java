@@ -16,16 +16,23 @@
  */
 package spark.examples.filter;
 
-import static spark.Spark.before;
 import static spark.Spark.*;
+import spark.Filter;
+import spark.Request;
+import spark.Response;
 
 
 public class FilterExampleWildcard {
 
     public static void main(String[] args) {
-        before("/protected/*", (request, response) -> {
-            // ... check if authenticated
-            halt(401, "Go Away!");
+        before("/protected/*", new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                // ... check if authenticated
+                halt(401, "Go Away!");
+            }
         });
     }
 

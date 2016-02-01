@@ -13,7 +13,7 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
 @WebSocket
 public class WebSocketTestHandler {
-    public static final List<String> events = synchronizedList(new ArrayList<>());
+    public static final List<String> events = synchronizedList(new ArrayList<String>());
 
     @OnWebSocketConnect
     public void connected(Session session) {

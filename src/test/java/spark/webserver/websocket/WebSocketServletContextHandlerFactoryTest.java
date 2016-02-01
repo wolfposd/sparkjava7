@@ -1,23 +1,25 @@
 package spark.webserver.websocket;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
 import org.eclipse.jetty.websocket.server.pathmap.PathMappings;
 import org.eclipse.jetty.websocket.server.pathmap.PathSpec;
-import org.eclipse.jetty.websocket.server.pathmap.ServletPathSpec;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
 import spark.websocket.WebSocketTestHandler;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.junit.Assert.*;
 
 @RunWith(PowerMockRunner.class)
 public class WebSocketServletContextHandlerFactoryTest {
@@ -28,7 +30,7 @@ public class WebSocketServletContextHandlerFactoryTest {
     @Test
     public void testCreate_whenWebSocketHandlersIsNull_thenReturnNull() throws Exception {
 
-        servletContextHandler = WebSocketServletContextHandlerFactory.create(null, Optional.empty());
+        servletContextHandler = WebSocketServletContextHandlerFactory.create(null, WebSocketServletContextHandlerFactory.NO_TIMEOUT);
 
         assertNull("Should return null because no WebSocket Handlers were passed", servletContextHandler);
 
@@ -41,7 +43,9 @@ public class WebSocketServletContextHandlerFactoryTest {
 
         webSocketHandlers.put(webSocketPath, WebSocketTestHandler.class);
 
-        servletContextHandler = WebSocketServletContextHandlerFactory.create(webSocketHandlers, Optional.empty());
+        
+        servletContextHandler = WebSocketServletContextHandlerFactory.create(null, WebSocketServletContextHandlerFactory.NO_TIMEOUT);
+        servletContextHandler = null;//WebSocketServletContextHandlerFactory.create(webSocketHandlers, Optional.empty());
 
         WebSocketUpgradeFilter webSocketUpgradeFilter =
                 (WebSocketUpgradeFilter) servletContextHandler.getAttribute("org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter");
@@ -50,7 +54,7 @@ public class WebSocketServletContextHandlerFactoryTest {
 
         PathMappings.MappedResource mappedResource = webSocketUpgradeFilter.getMappings().getMatch("/websocket");
         WebSocketCreatorFactory.SparkWebSocketCreator sc = (WebSocketCreatorFactory.SparkWebSocketCreator) mappedResource.getResource();
-        PathSpec pathSpec = (PathSpec) mappedResource.getPathSpec();
+        PathSpec pathSpec = mappedResource.getPathSpec();
 
         assertEquals("Should return the WebSocket path specified when contexst handler was created",
                 webSocketPath, pathSpec.getPathSpec());
@@ -63,13 +67,13 @@ public class WebSocketServletContextHandlerFactoryTest {
     @Test
     public void testCreate_whenTimeoutIsPresent() throws Exception {
 
-        final Integer timeout = Integer.valueOf(1000);
+        final long timeout = 1000l;
 
         Map<String, Class<?>> webSocketHandlers = new HashMap<>();
 
         webSocketHandlers.put(webSocketPath, WebSocketTestHandler.class);
 
-        servletContextHandler = WebSocketServletContextHandlerFactory.create(webSocketHandlers, Optional.of(timeout));
+        servletContextHandler = WebSocketServletContextHandlerFactory.create(webSocketHandlers, timeout);
 
         WebSocketUpgradeFilter webSocketUpgradeFilter =
                 (WebSocketUpgradeFilter) servletContextHandler.getAttribute("org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter");
@@ -78,11 +82,11 @@ public class WebSocketServletContextHandlerFactoryTest {
 
         WebSocketServerFactory webSocketServerFactory = webSocketUpgradeFilter.getFactory();
         assertEquals("Timeout value should be the same as the timeout specified when context handler was created",
-                timeout.longValue(), webSocketServerFactory.getPolicy().getIdleTimeout());
+                timeout, webSocketServerFactory.getPolicy().getIdleTimeout());
 
         PathMappings.MappedResource mappedResource = webSocketUpgradeFilter.getMappings().getMatch("/websocket");
         WebSocketCreatorFactory.SparkWebSocketCreator sc = (WebSocketCreatorFactory.SparkWebSocketCreator) mappedResource.getResource();
-        PathSpec pathSpec = (PathSpec) mappedResource.getPathSpec();
+        PathSpec pathSpec = mappedResource.getPathSpec();
 
         assertEquals("Should return the WebSocket path specified when context handler was created",
                 webSocketPath, pathSpec.getPathSpec());
@@ -101,7 +105,7 @@ public class WebSocketServletContextHandlerFactoryTest {
 
         webSocketHandlers.put(webSocketPath, WebSocketTestHandler.class);
 
-        servletContextHandler = WebSocketServletContextHandlerFactory.create(webSocketHandlers, Optional.empty());
+        servletContextHandler = WebSocketServletContextHandlerFactory.create(webSocketHandlers, WebSocketServletContextHandlerFactory.NO_TIMEOUT);
 
         assertNull("Should return null because Websocket context handler was not created", servletContextHandler);
 

@@ -21,6 +21,7 @@ import static spark.Spark.get;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import spark.Filter;
 import spark.Request;
 import spark.Response;
@@ -36,20 +37,35 @@ public class FilterExampleAttributes {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterExampleAttributes.class);
 
     public static void main(String[] args) {
-        get("/hi", (request, response) -> {
-            request.attribute("foo", "bar");
-            return null;
-        });
-
-        after("/hi", (request, response) -> {
-            for (String attr : request.attributes()) {
-                LOGGER.info("attr: " + attr);
+        get("/hi", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                request.attribute("foo", "bar");
+                return null;
             }
         });
 
-        after("/hi", (request, response) -> {
-            String foo = request.attribute("foo");
-            response.body(asXml("foo", foo));
+        after("/hi", new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                for (String attr : request.attributes()) {
+                    LOGGER.info("attr: " + attr);
+                }
+            }
+        });
+
+        after("/hi", new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                String foo = request.attribute("foo");
+                response.body(asXml("foo", foo));
+            }
         });
     }
 

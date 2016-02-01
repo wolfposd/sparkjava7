@@ -45,14 +45,25 @@ public class BooksIntegrationTest {
 
     @BeforeClass
     public static void setup() {
-        before((request, response) -> {
-            response.header("FOZ", "BAZ");
+        before(new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                response.header("FOZ", "BAZ");
+                
+            }
         });
 
         Books.main(null);
 
-        after((request, response) -> {
-            response.header("FOO", "BAR");
+        after(new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                response.header("FOO", "BAR");
+            }
         });
 
         Spark.awaitInitialization();

@@ -17,7 +17,6 @@
 package spark.webserver.websocket;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
@@ -32,6 +31,8 @@ import org.slf4j.LoggerFactory;
 public class WebSocketServletContextHandlerFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketServletContextHandlerFactory.class);
+    
+    public static final long NO_TIMEOUT = -1l;
 
     /**
      * Creates a new websocket servlet context handler.
@@ -41,14 +42,14 @@ public class WebSocketServletContextHandlerFactory {
      * @return a new websocket servlet context handler or 'null' if creation failed.
      */
     public static ServletContextHandler create(Map<String, Class<?>> webSocketHandlers,
-                                               Optional<Integer> webSocketIdleTimeoutMillis) {
+                                               long webSocketIdleTimeoutMillis) {
         ServletContextHandler webSocketServletContextHandler = null;
         if (webSocketHandlers != null) {
             try {
                 webSocketServletContextHandler = new ServletContextHandler(null, "/", true, false);
                 WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configureContext(webSocketServletContextHandler);
-                if (webSocketIdleTimeoutMillis.isPresent()) {
-                    webSocketUpgradeFilter.getFactory().getPolicy().setIdleTimeout(webSocketIdleTimeoutMillis.get());
+                if (webSocketIdleTimeoutMillis > 0) {
+                    webSocketUpgradeFilter.getFactory().getPolicy().setIdleTimeout(webSocketIdleTimeoutMillis);
                 }
                 for (String path : webSocketHandlers.keySet()) {
                     WebSocketCreator webSocketCreator = WebSocketCreatorFactory.create(webSocketHandlers.get(path));

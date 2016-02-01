@@ -20,6 +20,9 @@ import static spark.Spark.get;
 import static spark.Spark.halt;
 import static spark.Spark.post;
 import static spark.Spark.secure;
+import spark.Request;
+import spark.Response;
+import spark.Route;
 
 /**
  * A simple example just showing some basic functionality You'll need to provide
@@ -37,33 +40,81 @@ public class SimpleSecureExample {
 
         secure(args[0], args[1], null, null);
 
-        get("/hello", (request, response) -> "Hello Secure World!");
-
-        post("/hello", (request, response) -> "Hello Secure World: " + request.body());
-
-        get("/private", (request, response) -> {
-            response.status(401);
-            return "Go Away!!!";
+        get("/hello", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "Hello Secure World!";
+            }
         });
 
-        get("/users/:name", (request, response) -> "Selected user: " + request.params(":name"));
-
-        get("/news/:section", (request, response) -> {
-            response.type("text/xml");
-            return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><news>"
-                    + request.params("section") + "</news>";
+        post("/hello", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "Hello Secure World: " + request.body();
+            }
         });
 
-        get("/protected", (request, response) -> {
-            halt(403, "I don't think so!!!");
-            return null;
+        get("/private", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                response.status(401);
+                return "Go Away!!!";
+            }
         });
 
-        get("/redirect", (request, response) -> {
-            response.redirect("/news/world");
-            return null;
+        get("/users/:name", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "Selected user: " + request.params(":name");
+            }
         });
 
-        get("/", (request, response) -> "root");
+        get("/news/:section", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                response.type("text/xml");
+                return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><news>"
+                        + request.params("section") + "</news>";
+            }
+        });
+
+        get("/protected", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                halt(403, "I don't think so!!!");
+                return null;
+            }
+        });
+
+        get("/redirect", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                response.redirect("/news/world");
+                return null;
+            }
+        });
+
+        get("/", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "root";
+            }
+        });
     }
 }

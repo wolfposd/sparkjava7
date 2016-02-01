@@ -1,7 +1,6 @@
 package spark;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import spark.ssl.SslStores;
@@ -23,7 +22,7 @@ public interface SparkServer {
      * @param minThreads                 - min nbr of threads.
      * @param threadIdleTimeoutMillis    - idle timeout (ms).
      * @param webSocketHandlers          - web socket handlers.
-     * @param webSocketIdleTimeoutMillis - Optional WebSocket idle timeout (ms).
+     * @param webSocketIdleTimeoutMillis - WebSocket idle timeout (ms), use -1 to disable.
      */
     void ignite(String host,
                 int port,
@@ -33,7 +32,7 @@ public interface SparkServer {
                 int minThreads,
                 int threadIdleTimeoutMillis,
                 Map<String, Class<?>> webSocketHandlers,
-                Optional<Integer> webSocketIdleTimeoutMillis);
+                long webSocketIdleTimeoutMillis);
 
     void stop();
 }

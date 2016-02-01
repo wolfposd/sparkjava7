@@ -1,5 +1,9 @@
 package spark;
 
+import static spark.Spark.after;
+import static spark.Spark.before;
+import static spark.Spark.post;
+
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -8,10 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import spark.util.SparkTestUtil;
-
-import static spark.Spark.after;
-import static spark.Spark.before;
-import static spark.Spark.post;
 
 public class BodyAvailabilityTest {
 
@@ -44,20 +44,35 @@ public class BodyAvailabilityTest {
         routeBody = null;
         afterBody = null;
 
-        before("/hello", (req, res) -> {
-            LOGGER.debug("before-req.body() = " + req.body());
-            beforeBody = req.body();
+        before("/hello", new Filter()
+        {
+            @Override
+            public void handle(Request req, Response response) throws Exception
+            {
+                LOGGER.debug("before-req.body() = " + req.body());
+                beforeBody = req.body();
+            }
         });
 
-        post("/hello", (req, res) -> {
-            LOGGER.debug("get-req.body() = " + req.body());
-            routeBody = req.body();
-            return req.body();
+        post("/hello", new Route()
+        {
+            @Override
+            public Object handle(Request req, Response response) throws Exception
+            {
+                LOGGER.debug("get-req.body() = " + req.body());
+                routeBody = req.body();
+                return req.body();
+            }
         });
 
-        after("/hello", (req, res) -> {
+        after("/hello",new Filter()
+        {
+            @Override
+            public void handle(Request req, Response response) throws Exception
+            {
             LOGGER.debug("after-before-req.body() = " + req.body());
             afterBody = req.body();
+            }
         });
 
         Spark.awaitInitialization();

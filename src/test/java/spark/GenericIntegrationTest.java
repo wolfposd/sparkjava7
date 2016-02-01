@@ -1,5 +1,16 @@
 package spark;
 
+import static spark.Spark.after;
+import static spark.Spark.before;
+import static spark.Spark.exception;
+import static spark.Spark.externalStaticFileLocation;
+import static spark.Spark.get;
+import static spark.Spark.halt;
+import static spark.Spark.patch;
+import static spark.Spark.post;
+import static spark.Spark.staticFileLocation;
+import static spark.Spark.webSocket;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
@@ -28,17 +39,6 @@ import spark.util.SparkTestUtil;
 import spark.util.SparkTestUtil.UrlResponse;
 import spark.websocket.WebSocketTestClient;
 import spark.websocket.WebSocketTestHandler;
-
-import static spark.Spark.after;
-import static spark.Spark.before;
-import static spark.Spark.exception;
-import static spark.Spark.externalStaticFileLocation;
-import static spark.Spark.get;
-import static spark.Spark.halt;
-import static spark.Spark.patch;
-import static spark.Spark.post;
-import static spark.Spark.staticFileLocation;
-import static spark.Spark.webSocket;
 
 public class GenericIntegrationTest {
 
@@ -72,110 +72,231 @@ public class GenericIntegrationTest {
         externalStaticFileLocation(System.getProperty("java.io.tmpdir"));
         webSocket("/ws", WebSocketTestHandler.class);
 
-        before("/secretcontent/*", (request, response) -> {
-            halt(401, "Go Away!");
+        before("/secretcontent/*", new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                halt(401, "Go Away!");
+            }
         });
 
-        before("/protected/*", "application/xml", (request, response) -> {
-            halt(401, "Go Away!");
+        before("/protected/*", "application/xml", new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                halt(401, "Go Away!");
+            }
         });
 
-        before("/protected/*", "application/json", (request, response) -> {
-            halt(401, "{\"message\": \"Go Away!\"}");
+        before("/protected/*", "application/json", new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                halt(401, "{\"message\": \"Go Away!\"}");
+            }
         });
 
-        get("/hi", "application/json", (request, response) -> {
-            return "{\"message\": \"Hello World\"}";
+        get("/hi", "application/json", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "{\"message\": \"Hello World\"}";
+            }
         });
 
-        get("/hi", (request, response) -> {
-            return "Hello World!";
+        get("/hi", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "Hello World!";
+            }
         });
 
-        get("/binaryhi", (request, response) -> {
-            return "Hello World!".getBytes();
+        get("/binaryhi", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "Hello World!".getBytes();
+            }
         });
 
-        get("/bytebufferhi", (request, response) -> {
-            return ByteBuffer.wrap("Hello World!".getBytes());
+        get("/bytebufferhi", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return ByteBuffer.wrap("Hello World!".getBytes());
+            }
         });
 
-        get("/inputstreamhi", (request, response) -> {
-            return new ByteArrayInputStream("Hello World!".getBytes("utf-8"));
+        get("/inputstreamhi", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return new ByteArrayInputStream("Hello World!".getBytes("utf-8"));
+            }
         });
 
-        get("/param/:param", (request, response) -> {
-            return "echo: " + request.params(":param");
+        get("/param/:param", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "echo: " + request.params(":param");
+            }
         });
 
-        get("/paramandwild/:param/stuff/*", (request, response) -> {
-            return "paramandwild: " + request.params(":param") + request.splat()[0];
+        get("/paramandwild/:param/stuff/*", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "paramandwild: " + request.params(":param") + request.splat()[0];
+            }
         });
 
-        get("/paramwithmaj/:paramWithMaj", (request, response) -> {
-            return "echo: " + request.params(":paramWithMaj");
+        get("/paramwithmaj/:paramWithMaj", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "echo: " + request.params(":paramWithMaj");
+            }
         });
 
-        get("/templateView", (request, response) -> {
-            return new ModelAndView("Hello", "my view");
+        get("/templateView", new TemplateViewRoute()
+        {
+            @Override
+            public ModelAndView handle(Request request, Response response) throws Exception
+            {
+                return new ModelAndView("Hello", "my view");
+            }
         }, new TemplateEngine() {
+            @Override
             public String render(ModelAndView modelAndView) {
                 return modelAndView.getModel() + " from " + modelAndView.getViewName();
             }
         });
 
-        get("/", (request, response) -> {
-            return "Hello Root!";
+        get("/", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "Hello Root!";
+            }
         });
 
-        post("/poster", (request, response) -> {
-            String body = request.body();
-            response.status(201); // created
-            return "Body was: " + body;
+        post("/poster", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                String body = request.body();
+                response.status(201); // created
+                return "Body was: " + body;
+            }
         });
 
-        post("/post_via_get", (request, response) -> {
-            response.status(201); // created
-            return "Method Override Worked";
+        post("/post_via_get", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                response.status(201); // created
+                return "Method Override Worked";
+            }
         });
 
-        get("/post_via_get", (request, response) -> {
-            return "Method Override Did Not Work";
+        get("/post_via_get", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return "Method Override Did Not Work";
+            }
         });
 
-        patch("/patcher", (request, response) -> {
-            String body = request.body();
-            response.status(200);
-            return "Body was: " + body;
+        patch("/patcher", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                String body = request.body();
+                response.status(200);
+                return "Body was: " + body;
+            }
         });
 
-        after("/hi", (request, response) -> {
-            response.header("after", "foobar");
+        after("/hi", new Filter()
+        {
+            @Override
+            public void handle(Request request, Response response) throws Exception
+            {
+                response.header("after", "foobar");
+            }
         });
 
-        get("/throwexception", (request, response) -> {
-            throw new UnsupportedOperationException();
+        get("/throwexception", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                throw new UnsupportedOperationException();
+            }
         });
 
-        get("/throwsubclassofbaseexception", (request, response) -> {
-            throw new SubclassOfBaseException();
+        get("/throwsubclassofbaseexception", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                throw new SubclassOfBaseException();
+            }
         });
 
-        get("/thrownotfound", (request, response) -> {
-            throw new NotFoundException();
+        get("/thrownotfound", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                throw new NotFoundException();
+            }
         });
 
-        exception(UnsupportedOperationException.class, (exception, request, response) -> {
-            response.body("Exception handled");
+        exception(UnsupportedOperationException.class, new ExceptionHandler()
+        {
+            @Override
+            public void handle(Exception exception, Request request, Response response)
+            {
+                response.body("Exception handled");
+            }
         });
 
-        exception(BaseException.class, (exception, request, response) -> {
-            response.body("Exception handled");
+        exception(BaseException.class, new ExceptionHandler()
+        {
+            @Override
+            public void handle(Exception exception, Request request, Response response)
+            {
+                response.body("Exception handled");
+            }
         });
 
-        exception(NotFoundException.class, (exception, request, response) -> {
-            response.status(404);
-            response.body(NOT_FOUND_BRO);
+        exception(NotFoundException.class, new ExceptionHandler()
+        {
+            @Override
+            public void handle(Exception exception, Request request, Response response)
+            {
+                response.status(404);
+                response.body(NOT_FOUND_BRO);
+            }
         });
 
         Spark.awaitInitialization();
@@ -312,8 +433,13 @@ public class GenericIntegrationTest {
     }
 
     private static void registerEchoRoute(final String routePart) {
-        get("/tworoutes/" + routePart + "/:param", (request, response) -> {
-            return routePart + " route: " + request.params(":param");
+        get("/tworoutes/" + routePart + "/:param", new Route()
+        {
+            @Override
+            public Object handle(Request request, Response response) throws Exception
+            {
+                return routePart + " route: " + request.params(":param");
+            }
         });
     }
 

@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import spark.examples.exception.NotFoundException;
 import spark.util.SparkTestUtil;
-
 import static spark.Spark.exception;
 import static spark.Spark.externalStaticFileLocation;
 import static spark.Spark.get;
@@ -76,15 +75,32 @@ public class StaticFilesTest {
         staticFileLocation("/public");
         externalStaticFileLocation(System.getProperty("java.io.tmpdir"));
 
-        get("/hello", (q, a) -> FO_SHIZZY);
-
-        get("/*", (q, a) -> {
-            throw new NotFoundException();
+        get("/hello", new Route()
+        {
+            @Override
+            public Object handle(Request q, Response a) throws Exception
+            {
+                return FO_SHIZZY;
+            }
         });
 
-        exception(NotFoundException.class, (e, request, response) -> {
-            response.status(404);
-            response.body(NOT_FOUND_BRO);
+        get("/*", new Route()
+        {
+            @Override
+            public Object handle(Request q, Response a) throws Exception
+            {
+                throw new NotFoundException();
+            }
+        });
+
+        exception(NotFoundException.class, new ExceptionHandler()
+        {
+            @Override
+            public void handle(Exception e, Request request, Response response)
+            {
+                response.status(404);
+                response.body(NOT_FOUND_BRO);
+            }
         });
 
         Spark.awaitInitialization();
