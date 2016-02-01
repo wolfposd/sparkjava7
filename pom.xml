@@ -9,7 +9,7 @@
     <groupId>com.sparkjava</groupId>
     <artifactId>spark-core7</artifactId>
     <packaging>bundle</packaging>
-    <version>2.4-SNAPSHOT</version>
+    <version>2.3.9</version>
     <name>Spark Java 1.7</name>
     <description>A Sinatra inspired java web framework
 
