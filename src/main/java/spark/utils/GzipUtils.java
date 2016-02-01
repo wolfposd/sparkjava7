@@ -19,7 +19,6 @@ package spark.utils;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
-import java.util.function.Predicate;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,8 +36,6 @@ public class GzipUtils {
     private static final String CONTENT_ENCODING = "Content-Encoding";
 
     private static final String GZIP = "gzip";
-
-    private static final StringMatch STRING_MATCH = new StringMatch();
 
     // Hide constructor
     private GzipUtils() {
@@ -63,7 +60,16 @@ public class GzipUtils {
         OutputStream responseStream = httpResponse.getOutputStream();
 
         // GZIP Support handled here. First we must ensure that we want to use gzip, and that the client supports gzip
-        boolean acceptsGzip = Collections.list(httpRequest.getHeaders(ACCEPT_ENCODING)).stream().anyMatch(STRING_MATCH);
+        boolean acceptsGzip = false;
+        for(String s : Collections.list(httpRequest.getHeaders(ACCEPT_ENCODING)))
+        {
+            if(s.contains(GZIP))
+            {
+                acceptsGzip = true;
+                break;
+            }
+        }
+        
         boolean wantGzip = httpResponse.getHeaders(CONTENT_ENCODING).contains(GZIP);
 
         if (acceptsGzip) {
@@ -82,18 +88,5 @@ public class GzipUtils {
         }
     }
 
-    /**
-     * Used instead of lambdas due to risk for java.lang.IncompatibleClassChangeError.
-     */
-    private static class StringMatch implements Predicate<String> {
-        @Override
-        public boolean test(String s) {
-            if (s == null) {
-                return false;
-            }
-
-            return s.contains(GZIP);
-        }
-    }
 
 }

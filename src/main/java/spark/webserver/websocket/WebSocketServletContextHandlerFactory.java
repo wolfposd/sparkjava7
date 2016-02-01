@@ -32,7 +32,7 @@ public class WebSocketServletContextHandlerFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketServletContextHandlerFactory.class);
     
-    public static final long NO_TIMEOUT = -1l;
+    public static final long NO_TIMEOUT = 0;
 
     /**
      * Creates a new websocket servlet context handler.
@@ -48,7 +48,8 @@ public class WebSocketServletContextHandlerFactory {
             try {
                 webSocketServletContextHandler = new ServletContextHandler(null, "/", true, false);
                 WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configureContext(webSocketServletContextHandler);
-                if (webSocketIdleTimeoutMillis > 0) {
+                
+                if (webSocketIdleTimeoutMillis > NO_TIMEOUT) {
                     webSocketUpgradeFilter.getFactory().getPolicy().setIdleTimeout(webSocketIdleTimeoutMillis);
                 }
                 for (String path : webSocketHandlers.keySet()) {
